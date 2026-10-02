@@ -1,0 +1,45 @@
+# ÖRNEK GİZLİ PROFİL — kendi profilini oluşturmak için:
+#   cp config/profile.example.yaml config/profile.yaml   (bu dosya .gitignore'dadır)
+#   gh secret set PROFILE_YAML < config/profile.yaml       (GitHub Actions için)
+#
+# settings.yaml ile aynı yapıdadır; buradaki değerler onun üzerine yazılır (listeler tamamen değiştirilir).
+# Aşağıdaki örnek hayalidir: tarımda görüntü işlemeyle uğraşan bir okur.
+
+sections:
+  - id: work
+    title: "Senin İşin"
+    emoji: "🌱"
+    count: 4
+    popularity_weight: 0.04
+    description: >-
+      Computer vision for agriculture: crop disease detection, drone and satellite imagery,
+      plant phenotyping, image segmentation, edge deployment of vision models.
+    keywords: [computer vision, segmentation, detection, drone, satellite, remote sensing, crop, plant, agriculture]
+
+  - id: ai
+    title: "AI'da Önemli Gelişmeler"
+    emoji: "🚀"
+    count: 5
+    popularity_weight: 0.12
+    description: >-
+      Major developments in artificial intelligence: new frontier model releases, open-weight models,
+      breakthrough research results, important tools and AI policy with broad impact.
+    keywords: [llm, gpt, claude, gemini, llama, open-weight, benchmark, release, frontier]
+
+# Kişisel kaynaklar (sources.yaml'daki genel kaynaklara eklenir)
+extra_sources:
+  - name: arXiv Görüntü İşleme (cs.CV)
+    type: arxiv
+    url: https://rss.arxiv.org/rss/cs.CV
+    kind: paper
+    max_items: 600
+
+  - name: "Haber: precision agriculture AI"
+    type: rss
+    url: 'https://news.google.com/rss/search?q=%22precision+agriculture%22+AI+when:2d&hl=en-US&gl=US&ceid=US:en'
+    kind: news
+    max_items: 30
+
+# Flaş haber kaynakları (tam liste)
+flash:
+  sources: [OpenAI, Google DeepMind, Anthropic, Meta AI, Mistral AI, Hugging Face Blog, Hacker News, HF Daily Papers]

@@ -1,0 +1,86 @@
+name: Günlük AI Bülteni
+
+on:
+  schedule:
+    # 23:13 UTC = 02:13 Türkiye. GitHub zamanlanmış görevleri saatlerce geciktirebiliyor (gözlenen: ~6 saat);
+    # erken başlatınca bülten en geç sabah gelir. Gece gelirse sessiz bildirimle gönderilir (settings → quiet_hours).
+    # Saat başı yerine :13 seçildi çünkü saat başları GitHub'da en yoğun (ve en çok geciken) dakikalar.
+    - cron: "13 23 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry-run (bülten Telegram'a ÖNİZLEME olarak gelir, durum kaydedilmez)"
+        type: boolean
+        default: false
+      profile:
+        description: "LLM profili (boş = LLM_PROFILE değişkeni ya da settings.yaml varsayılanı)"
+        type: choice
+        options: ["", free, claude, claude_sonnet, hybrid]
+        default: ""
+
+permissions:
+  contents: write               # data/seen.json'u commit edebilmek için
+
+concurrency:
+  group: bulten
+  cancel-in-progress: false
+
+jobs:
+  bulten:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Bağımlılıkları kur
+        run: pip install -e .
+
+      - name: Embedding modeli önbelleği
+        uses: actions/cache@v6
+        with:
+          path: .cache/fastembed
+          key: fastembed-paraphrase-multilingual-MiniLM-L12-v2
+
+      - name: Kişisel bağlam ve profili secret'lardan oluştur
+        env:
+          CONTEXT_MD: ${{ secrets.CONTEXT_MD }}
+          PROFILE_YAML: ${{ secrets.PROFILE_YAML }}
+        run: |
+          if [ -n "$CONTEXT_MD" ]; then printf '%s\n' "$CONTEXT_MD" > config/context.md; else echo "::warning::CONTEXT_MD yok"; fi
+          if [ -n "$PROFILE_YAML" ]; then printf '%s\n' "$PROFILE_YAML" > config/profile.yaml; else echo "::warning::PROFILE_YAML yok, genel örnek bölümler kullanılacak"; fi
+
+      - name: Bülteni oluştur ve gönder
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Kalıcı profil seçimi: Settings → Secrets and variables → Actions → Variables → LLM_PROFILE
+          LLM_PROFILE: ${{ inputs.profile || vars.LLM_PROFILE }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python -m bulten ${{ inputs.dry_run && '--dry-run' || '' }}
+
+      - name: Durumu commit et (seen.json)
+        if: success() && !inputs.dry_run
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/
+          if [ -d archive ]; then git add archive/; fi
+          if git diff --staged --quiet; then
+            echo "Değişiklik yok"
+            exit 0
+          fi
+          git commit -m "bülten: $(date -u +%F) durum güncellemesi"
+          # Flaş workflow'u arada flash_seen.json'u commit etmiş olabilir (farklı dosya → çakışmaz)
+          for i in 1 2 3; do
+            git pull --rebase -q && git push -q && exit 0
+            sleep 5
+          done
+          exit 1

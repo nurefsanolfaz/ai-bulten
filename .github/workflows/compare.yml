@@ -1,0 +1,56 @@
+name: LLM Profil Karşılaştırması
+
+on:
+  workflow_dispatch:
+    inputs:
+      profiles:
+        description: "Virgülle ayrılmış profiller (boş = hepsi)"
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Bağımlılıkları kur
+        run: pip install -e .
+
+      - name: Embedding modeli önbelleği
+        uses: actions/cache@v6
+        with:
+          path: .cache/fastembed
+          key: fastembed-paraphrase-multilingual-MiniLM-L12-v2
+
+      - name: Kişisel bağlam ve profili secret'lardan oluştur
+        env:
+          CONTEXT_MD: ${{ secrets.CONTEXT_MD }}
+          PROFILE_YAML: ${{ secrets.PROFILE_YAML }}
+        run: |
+          if [ -n "$CONTEXT_MD" ]; then printf '%s\n' "$CONTEXT_MD" > config/context.md; else echo "::warning::CONTEXT_MD yok"; fi
+          if [ -n "$PROFILE_YAML" ]; then printf '%s\n' "$PROFILE_YAML" > config/profile.yaml; else echo "::warning::PROFILE_YAML yok, genel örnek bölümler kullanılacak"; fi
+
+      - name: Karşılaştır
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          PROFILES: ${{ inputs.profiles }}
+        run: |
+          # Rapor ve bültenler kişisel olduğu için public log/artifact yerine Telegram'a gönderilir
+          args="--telegram"
+          if [ -n "$PROFILES" ]; then args="$args --profiles $PROFILES"; fi
+          python -m bulten.compare $args

@@ -1,0 +1,1 @@
+"""Kişiselleştirilmiş günlük AI bülteni."""

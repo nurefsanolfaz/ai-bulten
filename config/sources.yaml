@@ -1,0 +1,132 @@
+# Kaynak listesi. Yeni RSS eklemek için bir blok kopyalaman yeterli.
+#
+# Alanlar:
+#   type:      rss | arxiv | hf_papers | hackernews | scrape | github_trending
+#   kind:      paper | lab | news | blog | community | code   (LLM'e bağlam olarak verilir)
+#   priority:  high → ön filtreyi atlar, doğrudan LLM puanlamasına gider (düşük hacimli önemli kaynaklar)
+#   require_ai_keywords: true → başlık/özette AI anahtar kelimesi yoksa elenir (genel kaynaklar için)
+#   max_items: kaynaktan alınacak en fazla öğe
+#   enabled:   false → geçici olarak kapat
+#   optional:  true → okunamazsa bültenin altında uyarı gösterme (sık engellenen kaynaklar, ör. Reddit)
+
+# ---------------------------------------------------------------- Makaleler
+- name: arXiv cs.AI/cs.CL/cs.LG
+  type: arxiv
+  url: https://rss.arxiv.org/rss/cs.AI+cs.CL+cs.LG
+  kind: paper
+  max_items: 1500
+
+- name: HF Daily Papers
+  type: hf_papers
+  url: https://huggingface.co/api/daily_papers
+  kind: paper
+  days: 3                       # hafta sonu boşluklarını kapatmak için son 3 gün
+  max_items: 150
+
+# ---------------------------------------------------------------- Lab blogları
+- name: OpenAI
+  type: rss
+  url: https://openai.com/news/rss.xml
+  kind: lab
+  priority: high
+
+- name: Google DeepMind
+  type: rss
+  url: https://deepmind.google/blog/rss.xml
+  kind: lab
+  priority: high
+
+- name: Google Research
+  type: rss
+  url: https://research.google/blog/rss/
+  kind: lab
+  priority: high
+
+- name: Hugging Face Blog
+  type: rss
+  url: https://huggingface.co/blog/feed.xml
+  kind: lab
+  priority: high
+
+- name: Mistral AI
+  type: rss
+  url: https://mistral.ai/news/rss
+  kind: lab
+  priority: high
+
+- name: Meta Engineering
+  type: rss
+  url: https://engineering.fb.com/feed/
+  kind: lab
+  require_ai_keywords: true
+
+# RSS'i olmayanlar: sayfadaki linkler taranır. İlk çalışmada mevcut linkler
+# "görüldü" olarak kaydedilir, sonraki günlerde sadece yeni linkler gelir.
+- name: Anthropic
+  type: scrape
+  url: https://www.anthropic.com/news
+  link_pattern: '^/news/[a-z0-9-]+$'
+  kind: lab
+  priority: high
+
+- name: Meta AI
+  type: scrape
+  url: https://ai.meta.com/blog/
+  link_pattern: '^https://ai\.meta\.com/blog/[a-z0-9-]+/?$'
+  kind: lab
+  priority: high
+
+# ---------------------------------------------------------------- Bültenler & bloglar
+- name: Import AI
+  type: rss
+  url: https://jack-clark.net/feed/      # Substack adresi GitHub sunucularını engelliyor (403)
+  kind: blog
+  priority: high
+
+- name: Simon Willison
+  type: rss
+  url: https://simonwillison.net/atom/everything/
+  kind: blog
+  require_ai_keywords: true
+  max_items: 30
+
+- name: Latent Space
+  type: rss
+  url: https://www.latent.space/feed
+  kind: blog
+  priority: high
+
+- name: The Batch (DeepLearning.AI)
+  type: rss                     # site GitHub sunucularını engelliyor (403) → Google News üzerinden
+  url: 'https://news.google.com/rss/search?q=site:deeplearning.ai/the-batch+when:7d&hl=en-US&gl=US&ceid=US:en'
+  kind: blog
+  priority: high
+
+# ---------------------------------------------------------------- Topluluk
+- name: Hacker News
+  type: hackernews
+  url: https://hn.algolia.com/api/v1/search_by_date
+  kind: community
+  min_points: 40
+  require_ai_keywords: true
+  max_items: 200
+
+- name: r/MachineLearning
+  type: rss
+  url: https://www.reddit.com/r/MachineLearning/top/.rss?t=day
+  kind: community
+  optional: true                # Reddit GitHub sunucularını sık sık engelliyor (429/403)
+  max_items: 25
+
+- name: r/LocalLLaMA
+  type: rss
+  url: https://www.reddit.com/r/LocalLLaMA/top/.rss?t=day
+  kind: community
+  optional: true                # Reddit GitHub sunucularını sık sık engelliyor (429/403)
+  max_items: 25
+
+- name: GitHub Trending
+  type: github_trending
+  url: https://github.com/trending?since=daily
+  kind: code
+  require_ai_keywords: true
