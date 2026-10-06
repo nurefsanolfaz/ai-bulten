@@ -5,8 +5,6 @@ timezone_offset_hours: 3        # Türkiye (UTC+3) — bülten tarihi için
 quiet_hours: [0, 7]             # TR saatiyle bu aralıkta gelen bülten sessiz bildirimle gönderilir
 lookback_hours: 48              # tarihi olan öğelerde en fazla bu kadar geriye bak
 seen_retention_days: 90         # bu kadar gündür hiçbir kaynakta görülmeyen kayıtlar silinir
-archive: false                  # true → her bülten archive/YYYY-MM-DD.md olarak repoya da yazılır
-                                #        (public repoda herkes görür; sosyal medya paylaşımı için faydalı)
 
 # ---------------------------------------------------------------------------
 # Bülten bölümleri — BURADAKİLER GENEL ÖRNEKTİR.

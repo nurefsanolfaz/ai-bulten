@@ -97,7 +97,26 @@ Ayrıca:
   hash'lenir; gönderilen haberler için başlık yerine sadece embedding vektörü saklanır.
 - **Actions logları** public repoda herkese açıktır: profildeki kaynak adları ve bölüm başlıkları loglarda `***`
   olarak maskelenir; dry-run ve karşılaştırma çıktıları loga/artifact'e değil Telegram'a gönderilir.
-- `settings.yaml → archive: true` yaparsan bültenler `archive/` altında **repoya** kaydedilir (herkese açık!).
+- **Arşiv** (taranan tüm haberler + puanlar + bültenler) bot reposuna değil, ayrı bir **gizli** repoya yazılır.
+
+## 🗄 Arşiv (opsiyonel)
+
+Her gece o gün ilk kez görülen **tüm öğeler** (başlık, link, kaynak, tarih, özet, popülerlik, ön filtre puanı,
+adaylarda LLM puanı/bölümü/gerekçesi, gönderildi mi) ve **günün bülteni** ayrı bir **gizli** repoya eklenir:
+
+```
+veri/YYYY/MM/YYYY-MM-DD.jsonl.gz    bultenler/YYYY/YYYY-MM-DD.md
+```
+
+Kurulum: `<kullanıcı>/ai-bulten-arsiv` adında **private** bir repo aç, sonra sadece o repoya yazabilen bir
+deploy key oluşturup bu reponun secret'ı yap (anahtar ekrana basılmaz, iş bitince silinir):
+
+```bash
+ssh-keygen -q -t ed25519 -N "" -C ai-bulten-arsiv -f /tmp/arsiv_key && gh repo deploy-key add /tmp/arsiv_key.pub --repo <kullanıcı>/ai-bulten-arsiv --allow-write --title "ai-bulten bot" && gh secret set ARCHIVE_DEPLOY_KEY --repo <kullanıcı>/ai-bulten < /tmp/arsiv_key; rm -f /tmp/arsiv_key /tmp/arsiv_key.pub
+```
+
+Farklı bir repo adı için `ARCHIVE_REPO` değişkenini (*Actions → Variables*) `kullanıcı/repo` olarak ayarla.
+`ARCHIVE_DEPLOY_KEY` yoksa arşiv adımı sessizce atlanır. Veriyi okumak için arşiv reposunun README'sine bak.
 
 ## ⚡ Flaş haberler
 

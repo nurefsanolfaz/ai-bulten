@@ -29,6 +29,10 @@ jobs:
   bulten:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    env:
+      # Gizli arşiv reposu (varsayılan: <kullanıcı>/ai-bulten-arsiv); anahtar yoksa arşiv adımı atlanır
+      ARCHIVE_REPO: ${{ vars.ARCHIVE_REPO || format('{0}/ai-bulten-arsiv', github.repository_owner) }}
+      ARCHIVE_ENABLED: ${{ secrets.ARCHIVE_DEPLOY_KEY != '' }}
     steps:
       - uses: actions/checkout@v7
 
@@ -72,13 +76,38 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data/
-          if [ -d archive ]; then git add archive/; fi
           if git diff --staged --quiet; then
             echo "Değişiklik yok"
             exit 0
           fi
           git commit -m "bülten: $(date -u +%F) durum güncellemesi"
           # Flaş workflow'u arada flash_seen.json'u commit etmiş olabilir (farklı dosya → çakışmaz)
+          for i in 1 2 3; do
+            git pull --rebase -q && git push -q && exit 0
+            sleep 5
+          done
+          exit 1
+
+      # Arşiv: taranan tüm öğeler + puanlar + bülten → GİZLİ arşiv reposu (public bot reposuna değil)
+      - name: Arşiv reposunu getir
+        if: success() && !inputs.dry_run && env.ARCHIVE_ENABLED == 'true'
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ env.ARCHIVE_REPO }}
+          ssh-key: ${{ secrets.ARCHIVE_DEPLOY_KEY }}
+          path: _arsiv
+
+      - name: Arşive ekle
+        if: success() && !inputs.dry_run && env.ARCHIVE_ENABLED == 'true'
+        working-directory: _arsiv
+        run: |
+          if [ ! -d ../out/arsiv ]; then echo "Arşivlenecek dosya yok"; exit 0; fi
+          cp -R ../out/arsiv/. .
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --staged --quiet; then echo "Değişiklik yok"; exit 0; fi
+          git commit -q -m "arşiv: $(date -u +%F)"
           for i in 1 2 3; do
             git pull --rebase -q && git push -q && exit 0
             sleep 5

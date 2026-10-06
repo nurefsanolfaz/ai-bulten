@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from . import collectors
 from .collectors.base import make_client
@@ -20,6 +20,7 @@ class Gathered:
     n_items: int
     candidates: list[Item]
     errors: dict[str, str]
+    new_items: list[Item] = field(default_factory=list)  # o gün ilk kez görülen tüm öğeler (arşiv için)
 
 
 def setup_logging(verbose: bool = False) -> None:
@@ -79,4 +80,4 @@ def gather_candidates(
     gated = {s["name"] for s in sources if s.get("require_ai_keywords")}
     new = ai_gate(new, gated, settings["prefilter"]["ai_keywords"])
     new = dedupe_semantically(new, settings, [store] + ([flash_store] if flash_store else []))
-    return Gathered(len(items), prefilter(new, settings), errors)
+    return Gathered(len(items), prefilter(new, settings), errors, new)

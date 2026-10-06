@@ -17,6 +17,7 @@ from .config import (
     ARCHIVE_DIR, DATA_DIR, ROOT, in_github_actions, load_context, load_dotenv, load_settings, load_sources,
     mask_private_in_logs,
 )
+from .archive import write_daily as write_archive
 from .dedup import STATUS_SCORED, SeenStore
 from .llm import LLM, estimate_cost
 from .pipeline import filter_sources, gather_candidates, mark_sent, setup_logging
@@ -110,9 +111,7 @@ def main(argv: list[str] | None = None) -> int:
     log.info("Telegram'a %d mesaj gönderildi", n_msgs)
     if nl:
         mark_sent(store, nl.items, settings)
-    if settings.get("archive"):
-        ARCHIVE_DIR.mkdir(exist_ok=True)
-        (ARCHIVE_DIR / f"{today.isoformat()}.md").write_text(markdown, encoding="utf-8")
+    write_archive(ARCHIVE_DIR, today, gathered.new_items, candidates, nl.items if nl else [], markdown)
     pruned = store.prune(settings["seen_retention_days"])
     store.save()
     log.info("seen.json kaydedildi (%d kayıt, %d eski kayıt silindi)", len(store.items), pruned)

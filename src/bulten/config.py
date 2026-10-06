@@ -21,7 +21,7 @@ ROOT = Path(__file__).resolve().parents[2]
 CONFIG_DIR = ROOT / "config"
 PROMPTS_DIR = ROOT / "prompts"
 DATA_DIR = ROOT / "data"
-ARCHIVE_DIR = ROOT / "archive"
+ARCHIVE_DIR = ROOT / "out" / "arsiv"  # GitHub Actions bunu gizli arşiv reposuna commit eder
 
 log = logging.getLogger(__name__)
 
