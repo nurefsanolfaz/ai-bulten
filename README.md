@@ -111,7 +111,31 @@ sektörü sarsan bir olay) gün içinde çıkarsa sabahı beklemezsin. **Flaş H
 
 Ayarlar: `settings.yaml → flash`, ölçütler: `prompts/flash.md`.
 
-> GitHub zamanlanmış çalışmaları yoğunlukta geciktirebilir; flaşlar genelde 1 saat içinde, bazen daha geç gelir.
+> GitHub zamanlanmış çalışmaları yoğunlukta geciktirebilir, hatta atlayabilir (gözlenen: 40 saatte 40 yerine 8 çalışma).
+> Dakikası dakikasına kontrol için aşağıdaki harici zamanlayıcıyı kur; GitHub'ın kendi zamanlaması yedek olarak kalır.
+
+### Harici zamanlayıcı (opsiyonel, önerilir)
+
+[cron-job.org](https://cron-job.org) (ücretsiz) flaş workflow'unu GitHub API'si üzerinden tetikler.
+
+1. **Sadece bu repoyu tetikleyebilen bir token oluştur:** GitHub → *Settings → Developer settings →
+   Fine-grained tokens → Generate new token*
+   - *Repository access:* **Only select repositories** → bu repo
+   - *Permissions → Repository permissions → Actions:* **Read and write** (başka izin verme)
+   - *Expiration:* en fazla 1 yıl — bitmeden yenilemeyi unutma
+2. **cron-job.org'da bir cronjob oluştur:**
+   - *URL:* `https://api.github.com/repos/<kullanıcı>/<repo>/actions/workflows/flash.yml/dispatches`
+   - *Zamanlama:* her 30 dakikada bir
+   - *Advanced → Request method:* `POST`
+   - *Advanced → Headers:*
+     `Authorization: Bearer <token>` · `Accept: application/vnd.github+json` · `X-GitHub-Api-Version: 2026-03-10`
+   - *Advanced → Request body:* `{"ref": "main"}`
+   - Başarısız çalıştırmalar için e-posta bildirimini aç
+3. **Test et:** cron-job.org'daki "Test run" 200 (ya da 204) dönmeli ve *Actions* sekmesinde yeni bir
+   "Flaş Haber Kontrolü" çalıştırması (tetikleyici: `workflow_dispatch`) görünmeli.
+
+> Token yalnızca bu reponun workflow'larını tetikleyebilir/iptal edebilir; koda veya secret'lara erişemez.
+> Token sızarsa GitHub'dan hemen iptal et (*Fine-grained tokens → Revoke*).
 
 ## Tekrar eden haberler
 
