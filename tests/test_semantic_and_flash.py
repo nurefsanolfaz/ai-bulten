@@ -94,7 +94,7 @@ def test_flash_judge_and_render(settings):
         last_model = "fake"
 
         def chat(self, task, system, user, schema=None, temperature=0.3):
-            assert task == "score" and schema is flash.FLASH_SCHEMA and "{{context}}" not in system
+            assert task == "flash" and schema is flash.FLASH_SCHEMA and "{{context}}" not in system
             ps = json.loads(user)
             return json.dumps({"results": [
                 {"id": ps[0]["id"], "score": 10, "headline": "OpenAI GPT-7'yi duyurdu", "text": "Büyük <haber>."},
@@ -133,3 +133,20 @@ def test_flash_main_respects_quota_and_marks_sent(settings, monkeypatch, tmp_pat
     assert len(sent) == 3
     saved = json.loads((tmp_path / "flash_seen.json").read_text())
     assert sum(1 for v in saved["items"].values() if v.get("s") == "sent" and "e" in v) == 3
+
+
+def test_secondary_sources_need_higher_score(settings):
+    cfg = settings["flash"]
+    lab = it("Introducing a new frontier model", "OpenAI", "lab")
+    hn = it("Run a 125B model on a gaming GPU at 100 T/s", "Hacker News", "community", popularity=921)
+    assert flash.required_score(lab, cfg) == 9
+    assert flash.required_score(hn, cfg) == 10
+
+
+def test_flash_chain_falls_back_to_score(settings):
+    from bulten.llm import LLM
+
+    free = LLM(settings, profile="free")
+    assert free.chain("flash")[0]["reasoning_effort"] == "medium"   # ayrı, daha dikkatli zincir
+    claude = LLM(settings, profile="claude")
+    assert claude.chain("flash") == claude.chain("score")           # tanımlı değilse puanlama zinciri

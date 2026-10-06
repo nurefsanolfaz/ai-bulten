@@ -66,8 +66,12 @@ class LLM:
         self.last_model: str | None = None
         self.usage: list[Usage] = []
 
+    def chain(self, task: str) -> list[dict]:
+        # Profilde ayrı zinciri olmayan görevler (ör. "flash") puanlama zincirini kullanır
+        return self.chains.get(task) or self.chains["score"]
+
     def available(self, task: str) -> list[dict]:
-        return [s for s in self.chains[task] if os.environ.get(self.providers[s["provider"]]["api_key_env"])]
+        return [s for s in self.chain(task) if os.environ.get(self.providers[s["provider"]]["api_key_env"])]
 
     def chat(self, task: str, system: str, user: str, schema: dict | None = None, temperature: float = 0.3) -> str:
         """Bir görev (score/write) için yanıt metni döndürür. `schema` verilirse yanıt JSON olur."""

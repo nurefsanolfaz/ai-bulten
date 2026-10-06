@@ -99,6 +99,7 @@ providers:
 # ---------------------------------------------------------------------------
 # LLM profilleri — her profil puanlama (score) ve yazım (write) için bir model zinciri tanımlar.
 # Zincirdeki modeller sırayla denenir (hata / kota → sonrakine geç).
+# (Opsiyonel `flash` zinciri: tanımlı değilse flaş değerlendirmesi `score` zincirini kullanır.)
 # Aktif profil: `profile` alanı, ya da LLM_PROFILE ortam değişkeni (Actions'ta workflow girdisi).
 # Karşılaştırma için: python -m bulten.compare  (her profilin sadece İLK modellerini kullanır)
 #
@@ -120,6 +121,10 @@ llm:
         - {provider: gemini, model: "gemini-3.5-flash"}
         - {provider: gemini, model: "gemini-3.1-flash-lite"}
         - {provider: groq, model: "openai/gpt-oss-120b", reasoning_effort: medium}
+        - {provider: openrouter, model: "openai/gpt-oss-120b:free"}
+      flash:                    # saatte birkaç öğe → daha dikkatli düşünmeye kota yeter
+        - {provider: groq, model: "openai/gpt-oss-120b", reasoning_effort: medium}
+        - {provider: gemini, model: "gemini-3.5-flash"}
         - {provider: openrouter, model: "openai/gpt-oss-120b:free"}
 
     claude:                     # puanlama Haiku (ucuz, hızlı), yazım Opus 5 (en iyi Türkçe)
@@ -169,4 +174,9 @@ flash:
     Hacker News: 250
     HF Daily Papers: 100
   min_score: 9                  # 10 üzerinden; düşürürsen daha çok (ve daha az önemli) flaş gelir
+  # İkincil kaynaklar (topluluk, makale, kod, haber siteleri) için daha yüksek eşik: gerçekten büyük bir çıkış
+  # zaten lab'ın kendi blogundan da gelir. (Örn. çok popüler bir "X modelini ev bilgisayarında çalıştır" projesi
+  # 9 alabiliyor ama flaş değildir.)
+  secondary_kinds: [community, paper, code, news]
+  secondary_min_score: 10
   max_per_day: 3                # gün içinde en fazla bu kadar flaş

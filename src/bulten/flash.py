@@ -73,12 +73,12 @@ def judge(items: list[Item], llm: LLM, settings: dict, context: str) -> list[Ver
     for start in range(0, len(items), size):
         ids = {f"f{start + n}": it for n, it in enumerate(items[start : start + size])}
         payload = [
-            {"id": cid, "source": ", ".join([it.source, *it.also_on]), "title": it.title,
+            {"id": cid, "source": ", ".join([it.source, *it.also_on]), "type": it.kind, "title": it.title,
              "summary": it.summary[:700], **({"popularity": it.popularity} if it.popularity else {})}
             for cid, it in ids.items()
         ]
         try:
-            raw = llm.chat("score", system, json.dumps(payload, ensure_ascii=False, indent=1),
+            raw = llm.chat("flash", system, json.dumps(payload, ensure_ascii=False, indent=1),
                            schema=FLASH_SCHEMA, temperature=0.1)
             results = parse_json(raw).get("results", [])
         except (LLMError, ValueError) as e:
@@ -93,6 +93,13 @@ def judge(items: list[Item], llm: LLM, settings: dict, context: str) -> list[Ver
                 continue
             verdicts.append(Verdict(item, score, str(r.get("headline", "")).strip(), str(r.get("text", "")).strip()))
     return verdicts
+
+
+def required_score(item: Item, cfg: dict) -> float:
+    """İkincil kaynaklar (HN, makaleler…) daha yüksek eşik ister: gerçek büyük çıkış zaten lab'ın kendi blogundan gelir."""
+    if item.kind in cfg.get("secondary_kinds", []):
+        return cfg.get("secondary_min_score", cfg["min_score"])
+    return cfg["min_score"]
 
 
 def render_flash(v: Verdict) -> str:
@@ -157,7 +164,7 @@ def main(argv: list[str] | None = None) -> int:
         for v in verdicts:
             log.info("  %2.0f/10  %s", v.score, "(başlık gizli)" if public_log else v.item.title[:90])
             store.add(v.item, STATUS_SCORED)  # bir kez değerlendirilen tekrar sorulmaz
-        alerts = sorted((v for v in verdicts if v.score >= cfg["min_score"]), key=lambda v: -v.score)[:quota]
+        alerts = sorted((v for v in verdicts if v.score >= required_score(v.item, cfg)), key=lambda v: -v.score)[:quota]
 
     if args.dry_run:
         for v in alerts:

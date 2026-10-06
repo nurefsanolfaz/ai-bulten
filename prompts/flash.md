@@ -13,6 +13,13 @@ o yüzden çok seçici ol: çoğu gün hiçbir haber flaş değildir.
   - Sektörü sarsan bir olay (büyük güvenlik açığı, büyük düzenleme kararı, büyük şirket satın alması).
 - 0–8 (flaş gönderilmez, sabah bülteninde zaten yer bulur): Sıradan blog yazıları, küçük güncellemeler, artımsal makaleler,
   yatırım haberleri, etkinlik duyuruları, rehberler, vaka çalışmaları.
+- Ne kadar popüler ya da heyecan verici görünürse görünsün, şunlar FLAŞ DEĞİLDİR (en fazla 8):
+  - Üçüncü taraf araçlar, kütüphaneler, GitHub projeleri, "Show HN" paylaşımları,
+  - "X modelini Y donanımında çalıştır" tarzı demolar, kuantizasyon/hızlandırma projeleri,
+  - Doğrulanmamış hız, benchmark ya da performans iddiaları,
+  - Bir modelin adı geçiyor diye o modelin çıkışı olmayan haberler (çıkışın kendisi lab'ın resmi duyurusudur),
+  - Sadece yüksek popülerliğe (upvote, HN puanı) dayanan, içeriği belirsiz öğeler.
+- Elinde sadece başlık ve popülerlik varsa, içerik hakkında varsayım yapma; başlıktaki iddiayı doğru kabul etme.
 - Emin değilsen düşük puan ver.
 
 # Flaş metni
