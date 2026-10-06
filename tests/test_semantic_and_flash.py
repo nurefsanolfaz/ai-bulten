@@ -104,7 +104,7 @@ def test_flash_judge_and_render(settings):
     verdicts = flash.judge(items, FakeLLM(), settings, "ctx")
     assert [v.score for v in verdicts] == [10, 3]
     msg = flash.render_flash(verdicts[0])
-    assert msg.startswith("⚡ <b>FLAŞ</b>") and "Büyük &lt;haber&gt;." in msg and 'href="https://x/' in msg
+    assert msg.startswith("⚡ <b>FLAŞ HABER</b>") and "Büyük &lt;haber&gt;." in msg and 'href="https://x/' in msg
 
 
 def test_flash_main_respects_quota_and_marks_sent(settings, monkeypatch, tmp_path):

@@ -94,3 +94,23 @@ def test_write_falls_back_when_llm_fails():
 
     nl = write_newsletter({"work": [a]}, FakeLLM(responder), settings, "ctx", date(2026, 9, 28))
     assert nl.sections and nl.sections[0][1][0].text == "gerekçe"
+
+
+def test_telegram_layout_is_scannable_and_well_formed():
+    import re
+    from bulten.writer import Newsletter, Paragraph
+
+    settings = load_settings()
+    s0, s1 = settings["sections"][:2]
+    a, b, c = _items(3)
+    nl = Newsletter(day=date(2026, 10, 6), intro="Giriş", closing="Kapanış", footer="27 kaynak")
+    nl.sections = [(s0, [Paragraph("Bir", "metin bir", [a]), Paragraph("İki", "metin iki", [b])]),
+                   (s1, [Paragraph("Üç", "metin üç", [c])])]
+    blocks = render_telegram(nl)
+    text = "\n\n".join(blocks)
+    assert "📌 <b>Bugün:</b>" in blocks[0] and f"{s0['emoji']} {s0['title']} <b>2</b>" in blocks[0]
+    assert "<b>1. Bir</b>" in text and "<b>2. İki</b>" in text and "<b>1. Üç</b>" in text  # bölüm içinde numara
+    assert text.count("<blockquote expandable>") == 3
+    assert s0["title"].upper() in blocks[1] and "<b>2. İki</b>" not in blocks[1]  # bölüm başlığı ilk haberde
+    for tag in ("b", "i", "blockquote", "code", "a"):  # Telegram açık kalan etiketi reddeder
+        assert len(re.findall(rf"<{tag}[ >]", text)) == text.count(f"</{tag}>"), tag

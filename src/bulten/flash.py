@@ -104,10 +104,13 @@ def required_score(item: Item, cfg: dict) -> float:
 
 def render_flash(v: Verdict) -> str:
     link = f'<a href="{html.escape(v.item.url)}">{html.escape(v.item.source, quote=False)}</a>'
-    extra = f" (ayrıca: {html.escape(', '.join(v.item.also_on), quote=False)})" if v.item.also_on else ""
+    extra = f"\n<i>Ayrıca: {html.escape(', '.join(v.item.also_on), quote=False)}</i>" if v.item.also_on else ""
     return (
-        f"⚡ <b>FLAŞ</b> — <b>{html.escape(v.headline or v.item.title, quote=False)}</b>\n\n"
-        f"{html.escape(v.text, quote=False)}\n\n🔗 {link}{extra}"
+        "⚡ <b>FLAŞ HABER</b>\n"
+        "━━━━━━━━━━━━━━━━━━\n\n"
+        f"<b>{html.escape(v.headline or v.item.title, quote=False)}</b>\n\n"
+        f"{html.escape(v.text, quote=False)}\n\n"
+        f"🔗 {link}{extra}"
     )
 
 

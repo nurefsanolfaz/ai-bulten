@@ -162,25 +162,45 @@ def _links_html(items: list[Item]) -> str:
     return " · ".join(f'<a href="{html.escape(i.url)}">{_e(i.source)}</a>' for i in items)
 
 
+RULE = "━━━━━━━━━━━━━━━━━━"
+
+
+def _header(day: date) -> str:
+    return f"🗞 <b>AI BÜLTENİ</b>\n📅 <i>{_e(turkish_date(day))}</i>"
+
+
 def render_telegram(nl: Newsletter) -> list[str]:
-    """Telegram HTML blokları. Mesaj bölme blok sınırlarında yapılır."""
-    blocks = [f"<b>🗞 AI Bülteni</b> — {_e(turkish_date(nl.day))}"]
+    """Telegram HTML blokları. Mesaj bölme blok sınırlarında yapılır.
+
+    Düzen: başlık kartı (tarih, giriş, içindekiler) → her bölüm çizgili başlıkla → numaralı haberler.
+    Haber metni katlanır alıntıda (blockquote expandable): ilk bakışta başlık + ilk satırlar görünür,
+    dokununca tamamı açılır; böylece bülten hızlı taranır.
+    """
+    head = [_header(nl.day)]
     if nl.intro:
-        blocks[0] += f"\n\n<i>{_e(nl.intro)}</i>"
+        head.append(f"<blockquote>{_e(nl.intro)}</blockquote>")
+    toc = " · ".join(f"{sec['emoji']} {_e(sec['title'])} <b>{len(paras)}</b>" for sec, paras in nl.sections)
+    if toc:
+        head.append(f"📌 <b>Bugün:</b> {toc}")
+    blocks = ["\n\n".join(head)]
+
     for sec, paras in nl.sections:
-        first = True
-        for p in paras:
-            body = f"<b>{_e(p.headline)}</b>\n{_e(p.text)}\n🔗 {_links_html(p.items)}"
-            if first:
-                body = f"<b>{sec['emoji']} {_e(sec['title'].upper())}</b>\n\n" + body
-                first = False
+        for n, p in enumerate(paras, 1):
+            body = (
+                f"<b>{n}. {_e(p.headline)}</b>\n"
+                f"<blockquote expandable>{_e(p.text)}</blockquote>\n"
+                f"🔗 {_links_html(p.items)}"
+            )
+            if n == 1:
+                body = f"{RULE}\n{sec['emoji']} <b>{_e(sec['title'].upper())}</b>\n{RULE}\n\n" + body
             blocks.append(body)
-    tail = []
+
+    tail = [RULE]
     if nl.closing:
-        tail.append(f"💬 {_e(nl.closing)}")
+        tail.append(f"💬 <i>{_e(nl.closing)}</i>")
     if nl.footer:
-        tail.append(f"<i>{_e(nl.footer)}</i>")
-    if tail:
+        tail.append(f"<code>{_e(nl.footer)}</code>")
+    if len(tail) > 1:
         blocks.append("\n\n".join(tail))
     return blocks
 
@@ -203,7 +223,7 @@ def render_markdown(nl: Newsletter) -> str:
 
 def render_quiet(day: date, footer: str) -> list[str]:
     return [
-        f"<b>🗞 AI Bülteni</b> — {_e(turkish_date(day))}\n\n"
+        f"{_header(day)}\n\n"
         "Bugün kriterlerine uyan kayda değer yeni bir gelişme bulamadım. Yarın görüşmek üzere! ☕"
-        + (f"\n\n<i>{_e(footer)}</i>" if footer else "")
+        + (f"\n\n<code>{_e(footer)}</code>" if footer else "")
     ]
