@@ -1534,6 +1534,15 @@
 "d": "2026-10-25",
 "s": "scored"
 },
+"660410966f7be6b26d25": {
+"d": "2026-10-30",
+"s": "sent",
+"sd": "2026-10-30",
+"k": "blog",
+"src": "91268016fe6765efe3f7",
+"n": [],
+"e": "LqyRqFskyqFLrbAo/KYYraElm6QVGuAcFivyossoKCBjLZEvH5eLmSMnjiqpKZ0iRiMyJfqoViAYJjaqTy2XJAMvHqjXrfoi3qM1Fp2t4a0CoW0hHKF0qtysWqwur9YpTqLFKOWt+qq8p58qWKzdqFElbC//IR0qVaxPrAeqnyzRro0vfxXRq7Kp3R6+qbscPyFAq9MtAS5BqfiqMi7+p8goqam9I+EpdSlmpL4nxiorrJmqNKrCqMArTylELC2loSgFlAYpMyzPJ1qkSaoZqRCPG6TMniOqoJ6cKnWlFax/rE2oYS0GJ+2cgSNNnJCopyGpqFanvSDaKzioGJaFJjEsUSvHLYGceSgDMNqsQaSpKh2h6ihrKV6iIitNoNYitqXMKkAlqqv8p4OXFak+nGcsuyGxKzwi0isQqGawUSKmpCIprSkDm2sqX6cPqXwnrp7JJxOqZxu1pluosSgaIsOurSaRplCjd6w2Kjanw6QnrB2mbCmbmNsiuyiRKn8mcCY3G6sgo62YLE6CmKguKp6rGwy5rMsdqqRqK4CsNy0TmqEtVawCKVYhQKUhrsmun6yMKPistieSqz2o0pwyrfKpziKarEAsi5z1Jr2YTyVaLkkrJK+NoR8uVBqiIwKsAKUXmLcZb6EfJNsgHqoyKBwsFS8gqiIsBSHULLOlOipIrcGoTyaWLBYrxyafnIsmDCFnrKKvbiu0oNasxahmJ9musSvNKC+l4Khlrm6skKRPJuqppy/ZLVWqCaqGqECsw6gCLCOesyjnnRenziSbK7gqfyiCqekoBq3enQenpKkkkYchwCkiqdQiAiySKTCdQqhOJoIo/ytTIkwrLqYKrCaq0SKNI7ug95eVqdkldKxyqNWo1Sp9q/sufSubK8QnqygJpHCsWKdvKFQuIau2nFyrV61ZpT8sZ64Vql4mVi+QpgatwKjDnw2plaPqqW6jC6G0mqCqGiUHH+0eICzlrL0nryU1HVYjNiXtKWwpDy16LZ2iBijOLmytBil9JZwm"
+},
 "66539a3158b6b6c1bac2": {
 "d": "2026-10-30",
 "s": "baseline"
@@ -3218,6 +3227,11 @@
 "de240a0822eda285b94c": {
 "d": "2026-10-25",
 "s": "scored"
+},
+"de346e74bdef7d50442f": {
+"d": "2026-10-30",
+"s": "sent",
+"sd": "2026-10-30"
 },
 "de79cb80b5ecd41e9f6c": {
 "d": "2026-10-18",
